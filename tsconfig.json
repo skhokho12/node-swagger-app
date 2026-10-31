@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022" /* Modern Node.js version */,
+    "module": "commonjs",
+    "lib": ["ES2022"] /* Removed DOM, simplified ES versions */,
+    "outDir": "./dist" /* Uncommented this, you will want it */,
+    "rootDir": "./src" /* Good practice to define where source lives */,
+    "strict": true /* Highly recommended for TypeScript */,
+    "esModuleInterop": true /* Fixes import issues with Express */,
+    "skipLibCheck": true /* Speeds up compilation */,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true /* Helpful for debugging */,
+    "declaration": false /* Turned off unless building a library */
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
