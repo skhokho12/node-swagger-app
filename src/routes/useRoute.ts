@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { UserController } from "../controllers/userController";
+import { UserValidators } from "../validator/uservalidator";
 
 class userRoutes {
   public router: Router;
@@ -14,7 +15,7 @@ class userRoutes {
   }
 
   getRoutes() {
-    this.router.get("/login", new UserController().login);
+    this.router.post("/login", ...UserValidators.login(), new UserController().login);
 
     this.router.get("/test", (req, res, next) => {
       console.log("Test endpoint hit");
@@ -24,7 +25,14 @@ class userRoutes {
     });
   }
 
-  postRoutes() {}
+  postRoutes() {
+    this.router.post(
+      "/register",
+      ...UserValidators.signup(),
+      new UserController().register
+    );
+  }
+
   patchRoute() {}
 
   putRoutes() {}

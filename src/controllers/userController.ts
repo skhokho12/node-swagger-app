@@ -1,11 +1,81 @@
+import { Request, Response, NextFunction } from "express";
+import bcrypt from "bcryptjs";
+import User from "../models/user";
+import { Utils } from "../utils/utils";
+
+
+
 export class UserController {
-  public async login(req: any, res: any): Promise<void> {
+  public register = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    console.log("→ register hit");
+    console.log("HEADERS:", req.headers);
+    console.log("BODY:", req.body);
+
     try {
-      const data = [{ name: "vusi" }];
-      res.status(200).send(data);
+      const { name, email, password } = req.body ?? {};
+      if (!email || !password) {
+        res.status(400).json({ error: "email and password are required" });
+        return;
+      }
+
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const existing = await User.findOne({ email: normalizedEmail });
+      if (existing) {
+        res.status(409).json({ error: "User already exists" });
+        return;
+      }
+
+      const verificationToken = Utils.generateVerificationToken();
+      console.log("Generated verification token:", verificationToken);
+
+      const hash = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        name: name ?? "User",
+        email: normalizedEmail,
+        password: hash,
+        verificationToken,
+        verificationTokenExpires: new Date(Date.now() + 10 * 60 * 1000),
+      });
+
+      const { password: _pw, ...safeUser } = user.toObject();
+      res.status(201).json({
+        ...safeUser,
+        verificationToken,
+      });
     } catch (error) {
-      console.error("Error in login:", error);
-      res.status(500).send({ error: "Internal Server Error" });
+      next(error);
     }
-  }
+  };
+
+  public login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { email, password } = req.body ?? {};
+      if (!email || !password) {
+        res.status(400).json({ error: "email and password are required" });
+        return;
+      }
+
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const user = await User.findOne({ email: normalizedEmail });
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        res.status(401).json({ error: "Invalid credentials" });
+        return;
+      }
+
+      res.status(200).json({
+        message: "Logged in",
+        user: { id: user._id, email: user.email, name: user.name },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
