@@ -3,13 +3,11 @@ import bcrypt from "bcryptjs";
 import User from "../models/user";
 import { Utils } from "../utils/utils";
 
-
-
 export class UserController {
   public register = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     console.log("→ register hit");
     console.log("HEADERS:", req.headers);
@@ -42,9 +40,16 @@ export class UserController {
       });
 
       const { password: _pw, ...safeUser } = user.toObject();
+      const token = Utils.generateToken({
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+      });
+
       res.status(201).json({
         ...safeUser,
         verificationToken,
+        token,
       });
     } catch (error) {
       next(error);
@@ -54,7 +59,7 @@ export class UserController {
   public login = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { email, password } = req.body ?? {};
@@ -70,10 +75,64 @@ export class UserController {
         return;
       }
 
+      const token = Utils.generateToken({
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+      });
+
+      console.log("Login token:", token);
+
       res.status(200).json({
         message: "Logged in",
+        token,
         user: { id: user._id, email: user.email, name: user.name },
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public verify = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { email, verificationToken } = req.body ?? {};
+      if (!email || !verificationToken) {
+        res
+          .status(400)
+          .json({ error: "email and verification token are required" });
+        return;
+      }
+
+      const normalizedEmail = String(email).trim().toLowerCase();
+      const user = await User.findOne({ email: normalizedEmail });
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      if (user.verificationToken !== verificationToken) {
+        res.status(401).json({ error: "Invalid verification token" });
+        return;
+      }
+
+      if (
+        !user.verificationTokenExpires ||
+        new Date(user.verificationTokenExpires).getTime() < Date.now()
+      ) {
+        res.status(401).json({ error: "Verification token has expired" });
+        return;
+      }
+
+      user.verificationToken = undefined;
+      user.verificationTokenExpires = undefined;
+      user.emailVerified = true;
+      await user.save();
+
+      res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
       next(error);
     }

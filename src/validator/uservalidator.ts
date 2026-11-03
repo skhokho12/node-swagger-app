@@ -29,4 +29,15 @@ export class UserValidators {
       validate,
     ];
   }
+
+  static verifyUserEmail(): RequestHandler[] {
+    return [
+      body("email").isEmail().normalizeEmail().withMessage("Invalid email"),
+      body("verificationToken")
+        .trim()
+        .notEmpty()
+        .withMessage("Verification token is required"),
+      validate,
+    ];
+  }
 }

@@ -7,21 +7,27 @@
   "type": "commonjs",
   "main": "src/index.ts",
   "scripts": {
-    "start": "nodemon --exec \"npx tsx\" src/index.ts"
+    "start": "nodemon --exec \"npx tsx --no-warnings\" src/index.ts"
   },
   "dependencies": {
     "@types/body-parser": "^1.19.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.4.0",
     "cors": "^2.8.6",
     "express": "^5.3.0",
     "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.11.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "@types/nodemon": "^1.19.6",
-    "tsx": "^3.12.7"
+    "tsx": "^4.23.15"
+  },
+  "allowScripts": {
+    "esbuild@0.18.20": true
   }
 }
