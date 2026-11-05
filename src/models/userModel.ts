@@ -12,7 +12,11 @@ export class UserModel {
     name: string,
     id: string,
     type: string,
+<<<<<<< HEAD
     status: string
+=======
+    status: string,
+>>>>>>> 142b726cc035f284d068126c921ed97e60655483
   ) {
     this.email = email;
     this.password = password;
