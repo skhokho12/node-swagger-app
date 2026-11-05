@@ -9,4 +9,13 @@ export class Utils {
 
     return token;
   }
+
+  static generateOtpExpiry(minutes: number = 10): Date {
+    return new Date(Date.now() + minutes * 60 * 1000);
+  }
+
+  static isOtpExpired(expiresAt?: Date | string): boolean {
+    if (!expiresAt) return true;
+    return new Date(expiresAt).getTime() <= Date.now();
+  }
 }

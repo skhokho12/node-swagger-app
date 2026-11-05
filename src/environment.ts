@@ -1,10 +1,16 @@
 import { prodEnvironment } from "./environment.prod";
 import { devEnvironment } from "./environment.dev";
-// import { getEnvironment } from "./environment";
 
 export interface Environment {
   mongoUri: string;
-  //   dbConnectionString: string;
+  gmailAuth?: {
+    user?: string;
+    pass?: string;
+  };
+  sendgridAuth?: {
+    user?: string;
+    pass?: string;
+  };
 }
 
 export function getEnvironment() {
